@@ -1,0 +1,15 @@
+{'conv5_neurons': 128, 'dense3_enabled': False, 'dense2_dropout': 0.2, 'dense1_dropout': 0.2, 'conv5_enabled': False, 'dense2_activation': 'sigmoid', 'conv2_neurons': 256, 'loss': 'mse', 'convdense_dropout': 0.2, 'conv3_enabled': True, 'conv4_activation': 'selu', 'optimizer': 'sgd', 'final_activation': 'tanh', 'conv3_neurons': 256, 'conv2_activation': 'tanh', 'dense1_enabled': True, 'dense1_activation': 'tanh', 'dense1_neurons': 512, 'conv4_enabled': True, 'conv5_activation': 'sigmoid', 'conv1_neurons': 8, 'conv4_neurons': 256, 'dense2_enabled': False, 'conv1_activation': 'tanh', 'dense3_activation': 'tanh', 'conv3_activation': 'selu', 'dense3_neurons': 128, 'conv2_enabled': True, 'dense3_dropout': 0.5, 'dense2_neurons': 128}
+ID	TAR	TRR
+2	98.25	99.37	
+3	100.00	86.02	
+4	100.00	98.25	
+5	100.00	99.37	
+7	100.00	85.62	
+8	91.30	96.90	
+13	100.00	97.70	
+15	93.91	99.68	
+16	97.39	98.97	
+19	97.37	91.83	
+26	99.12	97.14	
+28	100.00	99.21	
+Score: 18424
