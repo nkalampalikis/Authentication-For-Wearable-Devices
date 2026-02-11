@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Data and databases
+databases_BVP/
+databases_BCG/
+data/
+*.sqlite
+*.db
+
+# Model cache
+models_cache/
+
+# Results
+bvp_results/
+bcg_results/
+genetic_*/
+saved_gens*/
+
+# Logs
+*.log
+log_training/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude Code
+CLAUDE.md
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt

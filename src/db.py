@@ -1,10 +1,9 @@
 import sqlite3
 import csv
-import numpy as np
-from bvp_filter import BVP
 import json
-from data import Data
+import numpy as np
 from scipy.interpolate import interp1d
+from .signal_filter import SignalFilter, SignalType
 
 class DB:
     def __init__(self, db_file, init=False):
@@ -50,7 +49,7 @@ class DB:
                 break
             samples += 1
         if( samples > 0 ):
-            data = np.split( data, [ samples - 1 ] )[ 1 ]
+            data = np.split(data, [samples - 1])[1]
 
 
         # Check if TS has duplicates and remove if necessary
@@ -116,7 +115,7 @@ class DB:
             data_a = np.split( data_a, [ g_len ] )[ 0 ]
         return data_a, data_g
 
-    def load_from_csv(self, gyro_file, accel_file, subject_id, session_id, sequence_id, window_sz, hz):
+    def load_from_csv(self, gyro_file, accel_file, subject_id, session_id, sequence_id, window_sz, hz, signal_type=None):
         f_gyro = open(gyro_file, "r" )
         f_accel = open(accel_file, "r")
         reader_gyro = csv.DictReader( f_gyro )
@@ -164,28 +163,52 @@ class DB:
         # Use overlapped data
         # r = list(range(0, window_sz*hz))
         r = list(range(0, hz))
-        while len(raw_gyro) > 0 and len(raw_accel) > 0:
+        while len(raw_gyro) >= hz * window_sz and len(raw_accel) >= hz * window_sz:
             g.append(raw_gyro[:hz*window_sz])
             a.append(raw_accel[:hz*window_sz])
             raw_accel = np.delete(raw_accel,r,0)
             raw_gyro = np.delete(raw_gyro,r,0)
 
-        # Drop last segment, as it may not be a full length one
+        # Merge accel and gyro segments into combined structured arrays
         max_seg = min(len(a), len(g))
         segments = []
-        for i in range(0, max_seg):
-            segments.append(Data(a[i], g[i], hz))
-        segments = list(filter(lambda x: len(x.data) == window_sz*hz, segments))
+        dtype = [
+            ('TS', 'float64'),
+            ('accel_X', 'float64'), ('accel_Y', 'float64'), ('accel_Z', 'float64'),
+            ('gyro_X', 'float64'), ('gyro_Y', 'float64'), ('gyro_Z', 'float64')
+        ]
 
+        for i in range(max_seg):
+            accel_seg, gyro_seg = a[i], g[i]
+            if len(accel_seg) != len(gyro_seg):
+                continue
 
-        # For each segment,generate a BVP
-        bvps = []
-        print("\rCreating BVP -/{}".format(len(segments)), end='')
-        for d in segments:
-            print("\rCreating BVP {}/{}".format(len(bvps) + 1, len(segments)), end='')
-            assert(len(d.data) == window_sz*hz)
-            b = BVP(d.data,hz)
-            bvps.append(b)
+            # Merge accel and gyro into single structured array
+            merged = np.array([
+                (
+                    gyro_seg["TS"][j],
+                    accel_seg["X"][j], accel_seg["Y"][j], accel_seg["Z"][j],
+                    gyro_seg["X"][j], gyro_seg["Y"][j], gyro_seg["Z"][j]
+                )
+                for j in range(len(accel_seg))
+            ], dtype=dtype)
+
+            if len(merged) == window_sz * hz:
+                segments.append(merged)
+
+        # Default to BCG for backward compatibility
+        if signal_type is None:
+            signal_type = SignalType.BCG
+
+        # Apply signal filter to each segment
+        filtered_segments = []
+        signal_name = signal_type.value.upper()
+        print(f"\rCreating {signal_name} -/{len(segments)}", end='')
+
+        for i, segment in enumerate(segments):
+            print(f"\rCreating {signal_name} {i + 1}/{len(segments)}", end='')
+            filtered = SignalFilter(segment, hz, signal_type)
+            filtered_segments.append(filtered)
         print()
 
 
@@ -212,19 +235,13 @@ class DB:
         self.conn.commit()
 
         # JSON encode segments and load them into the DB
-        for bvp in bvps:
+        for segment in filtered_segments:
             b = {}
 
-            for component in bvp.bvp_y:
-
-                b[component] = bvp.bvp_y[component].tolist()
-
-                # while len(b[component]) > window_sz * hz:
-                #     b[component].pop()
-                # while len(b[component]) < window_sz * hz:
-                #     b[component].append(0)
-
+            for component in segment.filtered_data:
+                b[component] = segment.filtered_data[component].tolist()
                 b[component] = json.dumps(b[component])
+
             self.cursor.execute("INSERT INTO `" + table_name +
             """` (segment_gyro_x,segment_gyro_y,
                  segment_gyro_z,segment_accl_x,
@@ -238,6 +255,6 @@ class DB:
             b["accel_X"],
             b["accel_Y"],
             b["accel_Z"],
-            BVP.VERSION])
+            SignalFilter.VERSION])
         self.conn.commit()
 
