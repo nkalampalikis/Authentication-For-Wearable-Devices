@@ -51,19 +51,18 @@ class GeneticConfig:
     TRAITS_DICT = _build_traits_dict()
 
     # Population settings
-    POPULATION_SIZE = 8
+    POPULATION_SIZE = 20
     FITTEST_RATIO = 0.25  # Top 25% become parents
-    OGRES = 1  # Random "losers" kept for genetic diversity
+    OGRES = 3  # Random "losers" kept for genetic diversity
 
     # Mutation settings
     DEFAULT_MUTATION_RATE = 15  # Percentage of traits that mutate
 
     # Target user IDs for fitness evaluation
-    #TARGETS_TEST = [2, 3, 4, 5, 7, 8, 13, 15, 16, 19, 26, 28]
-    TARGETS_TEST = [1, 2, 3, 4, 5]
+    TARGETS_TEST = [2, 3, 4, 5, 7, 8, 13, 15, 16, 19, 26, 28]
 
     # Training settings for genome evaluation
-    TRAIN_EPOCHS = 5
+    TRAIN_EPOCHS = 100
     TRAIN_SEGMENTS = [(1, 1), (1, 2), (1, 3), (1, 4)]  # (session_id, sequence_id)
 
     # Evolution settings
@@ -88,7 +87,13 @@ class Parameters:
         db (DB): Database connection for loading processed data.
     """
 
-    def __init__(self, window_size=5, signal_type=SignalType.BCG, epochs=10):
+    # Target user IDs for testing and training
+    TARGETS_TEST = [2, 3, 4, 5, 7, 8, 13, 15, 16, 19, 26, 28]
+
+    # Training settings
+    TRAIN_SEGMENTS = [(1, 1), (1, 2), (1, 3), (1, 4)]  # (session_id, sequence_id)
+
+    def __init__(self, window_size=5, signal_type=SignalType.BCG):
         """
         Initialize parameters with specified configuration.
 
@@ -102,7 +107,7 @@ class Parameters:
         self.signal_type = signal_type
 
         # Model configurations
-        self.epochs = epochs
+        self.epochs = 100
         self.model = {
             'conv5_neurons': 128,
             'dense3_enabled': False,

@@ -5,7 +5,6 @@ This module provides functions to test trained models and compute
 authentication metrics like TAR (True Accept Rate) and TRR (True Reject Rate).
 """
 
-import numpy as np
 from sklearn.metrics import confusion_matrix
 
 from .data_extraction import collect_segment_data, make_sequential

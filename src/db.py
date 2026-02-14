@@ -228,8 +228,7 @@ class DB:
             `segment_gyro_z`	TEXT NOT NULL,
             `segment_accl_x`	TEXT NOT NULL,
             `segment_accl_y`	TEXT NOT NULL,
-            `segment_accl_z`	TEXT NOT NULL,
-            `version`           REAL NOT NULL
+            `segment_accl_z`	TEXT NOT NULL
         );
         """);
         self.conn.commit()
@@ -245,16 +244,14 @@ class DB:
             self.cursor.execute("INSERT INTO `" + table_name +
             """` (segment_gyro_x,segment_gyro_y,
                  segment_gyro_z,segment_accl_x,
-                 segment_accl_y,segment_accl_z,
-                 version)
-                VALUES (?,?,?,?,?,?,?);
+                 segment_accl_y,segment_accl_z)
+                VALUES (?,?,?,?,?,?);
             """,[
             b["gyro_X"],
             b["gyro_Y"],
             b["gyro_Z"],
             b["accel_X"],
             b["accel_Y"],
-            b["accel_Z"],
-            SignalFilter.VERSION])
+            b["accel_Z"]])
         self.conn.commit()
 

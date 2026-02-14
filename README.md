@@ -79,24 +79,26 @@ The CLI provides all functionality through subcommands:
 ```bash
 # Initialize databases from raw sensor data
 python main.py init-db                           # All window sizes (2-5), both BCG and BVP
-python main.py init-db --signal-type bcg         # BCG only, all window sizes
-python main.py init-db --signal-type bvp -w 4 5  # BVP only, specific sizes
 
-# Train models for specific users
-python main.py train --targets 9 10 11 12 --window-size 4 --epochs 100
-python main.py train -t 9 10 11 -w 4 -e 50       # Short form
-python main.py train -t 9 10 --signal-type bvp   # Train with BVP data
+# Train models (uses TARGETS_TEST from params.py)
+python main.py train --window-size 4             # BCG signal, 4s windows
+python main.py train -w 4 -s bvp                 # BVP signal, 4s windows
+python main.py train --log-dir ./my_logs         # Custom log directory
 
 # Test trained models
-python main.py test --targets 9 10 --signal-type bvp
-python main.py test -t 9 10 11 -w 4 --threshold 0.5
+python main.py test --signal-type bvp            # Test with BVP models
+python main.py test -w 4 --threshold 0.5         # Custom window size and threshold
 
 # Run genetic algorithm optimization (all settings from GeneticConfig)
 python main.py genetic
 
+# Generate ROC curves for trained models
+python main.py plot-roc --window-size 4          # ROC curves for 4s window models
+python main.py plot-roc -w 5 -s bvp -o ./plots   # Save to directory
+
 # Plot training curves from logs
-python main.py plot-training --log-dir ./log_training --targets 2 3 4 5
-python main.py plot-training -d ./log_training -t 2 3 4 -o curves.png
+python main.py plot-training --log-dir ./log_training
+python main.py plot-training -d ./log_training -o curves.png
 
 # Parse genetic algorithm logs
 python main.py parse-logs --genetic-dir ./genetic_bcg_5
@@ -110,16 +112,16 @@ All configuration is centralized in `src/params.py`:
 
 **GeneticConfig** - Genetic algorithm settings:
 - `TRAITS_DICT`: Possible hyperparameter values (neurons, activations, dropout, etc.)
-- `POPULATION_SIZE`: Number of genomes per generation (default: 10)
-- `FITTEST_RATIO`: Percentage of top performers kept as parents (default: 0.25)
-- `OGRES`: Random "losers" kept for genetic diversity (default: 1)
-- `DEFAULT_MUTATION_RATE`: Mutation probability (default: 15%)
+- `POPULATION_SIZE`: Number of genomes per generation
+- `FITTEST_RATIO`: Percentage of top performers kept as parents
+- `OGRES`: Random "losers" kept for genetic diversity
+- `DEFAULT_MUTATION_RATE`: Mutation probability
 - `TARGETS_TEST`: User IDs for fitness evaluation
-- `TRAIN_EPOCHS`: Training epochs per genome evaluation (default: 10)
+- `TRAIN_EPOCHS`: Training epochs per genome evaluation
 - `TRAIN_SEGMENTS`: Training data segments (session_id, sequence_id) tuples
-- `GENERATIONS`: Number of generations to evolve (default: 2)
-- `WINDOW_SIZE`: Window size in seconds (default: 5)
-- `SIGNAL_TYPE`: Signal type "bcg" or "bvp" (default: "bcg")
+- `GENERATIONS`: Number of generations to evolve
+- `WINDOW_SIZE`: Window size in seconds
+- `SIGNAL_TYPE`: Signal type "bcg" or "bvp"
 
 **Parameters** - Model and data settings:
 - `window_sz`: Window size in seconds
@@ -213,9 +215,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you use this code in your research, please cite:
 
 **[Full Paper](https://digital.wpi.edu/concern/student_works/02870z59d?locale=en)**
-
-### MLA
-> Bhatia, Meghana, et al. *Designing an Authentication System for Augmented Reality Devices*. Worcester Polytechnic Institute, 2019.
 
 ### BibTeX
 ```bibtex

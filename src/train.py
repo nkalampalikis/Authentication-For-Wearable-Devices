@@ -5,6 +5,7 @@ This module provides the Trainer class which handles data preparation
 and model training for individual user authentication.
 """
 
+import os
 import time
 import numpy as np
 
@@ -35,6 +36,7 @@ class Trainer:
         """
         
         train_segments = GeneticConfig.TRAIN_SEGMENTS
+        self.owner = owner
         self.topo_path = f"./models_cache/{params.window_sz}/{owner}/topo.json"
         self.weights_path = f"./models_cache/{params.window_sz}/{owner}/model.weights.h5"
 
@@ -97,12 +99,13 @@ class Trainer:
 
         return tensor, labels
 
-    def train(self, params):
+    def train(self, params, log_dir=None):
         """
         Train the model on prepared data.
 
         Args:
             params: Parameters object with epochs setting
+            log_dir: Optional directory to save training logs
 
         Returns:
             Keras History object with training metrics
@@ -125,5 +128,14 @@ class Trainer:
 
         Model.save_model(self.model, self.topo_path, self.weights_path)
         print(f"Model trained in {elapsed:.2f}s")
+
+        # Save training accuracy log if log_dir specified
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+            log_path = os.path.join(log_dir, f"{self.owner}.log")
+            accuracies = history.history.get('accuracy', history.history.get('acc', []))
+            with open(log_path, 'w') as f:
+                f.write(f"accuracy = {accuracies}\n")
+            print(f"Training log saved to {log_path}")
 
         return history

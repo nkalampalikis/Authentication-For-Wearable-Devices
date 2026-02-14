@@ -3,9 +3,7 @@ Visualization utilities for model evaluation and analysis.
 """
 
 import os
-import csv
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from scipy.optimize import brentq
@@ -71,7 +69,8 @@ def plot_roc_curves(params, model_loader, targets, test_func, output_dir=None):
     )
 
     plt.legend(loc='lower right')
-    plt.title('ROC Curves')
+    signal_name = params.signal_type.value.upper()
+    plt.title(f'ROC Curves ({signal_name}, Window: {params.window_sz}s)')
     plt.grid(True, alpha=0.3)
 
     if output_dir:
@@ -143,7 +142,7 @@ def parse_genetic_logs(genetic_dir, output_path=None):
     """
     scores_by_gen = {}
 
-    for root, dirs, files in os.walk(genetic_dir):
+    for root, files in os.walk(genetic_dir):
         for file in files:
             if file.endswith('.log') and 'parent' not in file and 'ogre' not in file:
                 filepath = os.path.join(root, file)
